@@ -114,7 +114,7 @@ const { data: streams } = useQuery({
                 </div>
             </div>
             <button class="btn relative z-10" @click="muted = !muted">
-                <mdicon size="20" :name="muted ? 'volume-high' : 'volume-off'" />
+                <mdicon size="20" :name="muted ? 'volume-off' : 'volume-high'" />
             </button>
         </div>
         <div class="ml-2 flex-center">
