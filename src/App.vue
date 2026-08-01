@@ -73,17 +73,28 @@ const onResize = () => {
 onMounted(async () => {
     window.addEventListener('resize', onResize);
     onResize();
-    videoControls.playing.value = true;
 
     await connect();
 });
+
+const onLoadedMetadata = () => {
+    onResize();
+    videoControls.playing.value = true;
+}
 </script>
 
 <template>
     <div id="app" class="flex-center w-screen h-screen">
         <div class="w-full h-full flex-center relative">
             <div class="flex-center w-full h-full" @mousedown="videoControls.playing.value = !videoControls.playing.value">
-                <video ref="video" :width="videoWidth" :height="videoHeight" autoplay playsinline @loadedmetadata="onResize" />
+                <video
+                    ref="video"
+                    :width="videoWidth"
+                    :height="videoHeight"
+                    autoplay
+                    playsinline
+                    @loadedmetadata="onLoadedMetadata"
+                />
             </div>
             <toolbar :video-controls :video-fullscreen />
         </div>
