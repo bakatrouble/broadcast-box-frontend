@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@layer components {
+    .btn {
+        @apply cursor-pointer rounded-sm p-1 text-gray-200 transition-all bg-gray-800 hover:bg-gray-700
+    }
+}
+
+@layer utilities {
+    .flex-center {
+        justify-content: center;
+        align-items: center;
+        display: flex;
+    }
+}
