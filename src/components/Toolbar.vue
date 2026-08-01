@@ -126,8 +126,8 @@ const { data: streams } = useQuery({
         <button v-if="videoControls.supportsPictureInPicture" class="btn mr-2" @click="videoControls.togglePictureInPicture()">
             <mdicon name="picture-in-picture-bottom-right" />
         </button>
-        <button class="btn" @click="videoFullscreen.enter()">
-            <mdicon name="fullscreen" />
+        <button class="btn" @click="videoFullscreen.isFullscreen.value ? videoFullscreen.exit() : videoFullscreen.enter()">
+            <mdicon :name="videoFullscreen.isFullscreen.value ? 'fullscreen-exit' : 'fullscreen'" />
         </button>
     </div>
 

@@ -6,11 +6,12 @@ import { useFullscreen, useMediaControls, useUrlSearchParams } from "@vueuse/cor
 const pc = ref<RTCPeerConnection>();
 const video = ref<HTMLVideoElement>();
 const videoControls = useMediaControls(video);
-const videoFullscreen = useFullscreen(video);
 const searchParams = useUrlSearchParams('history');
 const channel = computed(() => searchParams?.channel as string || 'bakatrouble');
 const videoWidth = ref(0);
 const videoHeight = ref(0);
+const app = ref<HTMLElement>();
+const videoFullscreen = useFullscreen(app);
 
 const connect = async () => {
     const lpc = pc.value = new RTCPeerConnection({
@@ -84,7 +85,7 @@ const onLoadedMetadata = () => {
 </script>
 
 <template>
-    <div id="app" class="flex-center w-screen h-screen">
+    <div id="app" class="flex-center w-screen h-screen" ref="app">
         <div class="w-full h-full flex-center relative">
             <div class="flex-center w-full h-full" @mousedown="videoControls.playing.value = !videoControls.playing.value">
                 <video
