@@ -16,8 +16,10 @@ import {
     mdiVolumeOff,
     mdiVolumeHigh,
     mdiFullscreenExit,
-    mdiPictureInPictureBottomRight
+    mdiPictureInPictureBottomRight,
+    mdiViewStream,
 } from '@mdi/js';
+import { VueQueryPlugin } from "@tanstack/vue-query";
 
 createApp(App)
     .use(mdiVue, {
@@ -37,6 +39,8 @@ createApp(App)
             mdiVolumeHigh,
             mdiFullscreenExit,
             mdiPictureInPictureBottomRight,
+            mdiViewStream,
         }
     })
+    .use(VueQueryPlugin)
     .mount('#app')

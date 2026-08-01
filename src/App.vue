@@ -8,7 +8,7 @@ const video = ref<HTMLVideoElement>();
 const videoControls = useMediaControls(video);
 const videoFullscreen = useFullscreen(video);
 const searchParams = useUrlSearchParams('history');
-const channel = computed(() => searchParams?.channel || 'bakatrouble');
+const channel = computed(() => searchParams?.channel as string || 'bakatrouble');
 const videoWidth = ref(0);
 const videoHeight = ref(0);
 
@@ -96,7 +96,7 @@ const onLoadedMetadata = () => {
                     @loadedmetadata="onLoadedMetadata"
                 />
             </div>
-            <toolbar :video-controls :video-fullscreen />
+            <toolbar :video-controls :video-fullscreen :channel />
         </div>
     </div>
 </template>

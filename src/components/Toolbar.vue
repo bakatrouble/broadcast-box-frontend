@@ -6,10 +6,12 @@ import {
     useLocalStorage,
     type UseMediaControlsReturn, useTimeout
 } from "@vueuse/core";
+import { useQuery } from "@tanstack/vue-query";
 
-const { videoControls, videoFullscreen } = defineProps<{
+const { videoControls, videoFullscreen, channel } = defineProps<{
     videoControls: UseMediaControlsReturn,
     videoFullscreen: UseFullscreenReturn,
+    channel: string,
 }>();
 
 const volumeOut = ref(false);
@@ -73,6 +75,16 @@ onMounted(() => {
         showTimeout.start();
     });
 });
+
+const streamsModal = ref(false);
+const { data: streams } = useQuery({
+    queryKey: ['streams'],
+    queryFn: async () => {
+        const r = await fetch('https://broadcast.bakatrouble.me/api/status').then(res => res.json());
+        return r as { streamKey: string }[];
+    },
+    refetchInterval: 5000,
+});
 </script>
 
 <template>
@@ -105,6 +117,11 @@ onMounted(() => {
                 <mdicon size="20" :name="muted ? 'volume-high' : 'volume-off'" />
             </button>
         </div>
+        <div class="ml-2 flex-center">
+            <button class="btn relative z-10" title="Active streams" @click="streamsModal = true">
+                <mdicon size="20" name="view-stream" />
+            </button>
+        </div>
         <div class="grow"></div>
         <button v-if="videoControls.supportsPictureInPicture" class="btn mr-2" @click="videoControls.togglePictureInPicture()">
             <mdicon name="picture-in-picture-bottom-right" />
@@ -112,6 +129,32 @@ onMounted(() => {
         <button class="btn" @click="videoFullscreen.enter()">
             <mdicon name="fullscreen" />
         </button>
+    </div>
+
+    <div
+        class="fixed w-screen h-screen top-0 left-0 z-100 bg-[#00000060] flex-center opacity-0 pointer-events-none data-[show=true]:pointer-events-auto data-[show=true]:opacity-100 transition-opacity"
+        :data-show="streamsModal"
+        @click.self="streamsModal = false"
+    >
+        <div class="w-100 bg-gray-800 rounded-md text-gray-200 relative">
+            <div class="flex flex-row items-center border-b border-b-gray-600 px-4 py-2">
+                <h3 class="text-xl">Active streams</h3>
+                <div class="grow" />
+                <button class="cursor-pointer" @click="streamsModal = false">
+                    <mdicon name="close" />
+                </button>
+            </div>
+            <div class="px-4 py-2">
+                <a
+                    v-for="stream in streams"
+                    :class="['px-2 py-1 flex mb-1 rounded-sm w-full', stream.streamKey === channel ? 'bg-gray-600' : 'bg-gray-700']"
+                    :href="`/?channel=${stream.streamKey}`"
+                >
+                    <mdicon name="play" class="mr-2" />
+                    {{' '}}{{ stream.streamKey }}
+                </a>
+            </div>
+        </div>
     </div>
 </template>
 

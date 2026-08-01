@@ -11,6 +11,7 @@
   "dependencies": {
     "@mdi/js": "^7.4.47",
     "@tailwindcss/vite": "^4.3.3",
+    "@tanstack/vue-query": "^5.101.4",
     "@vueuse/core": "^14.4.0",
     "mdi-vue": "^3.0.13",
     "tailwindcss": "^4.3.3",
