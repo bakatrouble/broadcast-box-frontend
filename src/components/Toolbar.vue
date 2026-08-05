@@ -42,8 +42,10 @@ const volumeMouseDown = (e: MouseEvent) => {
 }
 
 const volumeMouseMove = (e: MouseEvent) => {
-    const rawValue = (e.clientY - volumeSliderRect.top.value) / volumeSliderRect.height.value;
-    volume.value = 1 - Math.max(0, Math.min(1, rawValue))
+    const rawValue = Math.abs((e.clientY - volumeSliderRect.top.value) / volumeSliderRect.height.value);
+    let value = 1 - Math.max(0, Math.min(1, rawValue));
+
+    videoControls.volume.value = volume.value = value;
 }
 
 const volumeMouseUp = () => {
@@ -66,8 +68,10 @@ onMounted(() => {
             videoControls.playing.value = !videoControls.playing.value;
         } else if (e.code === 'ArrowUp') {
             videoControls.volume.value += .1;
+            volume.value = videoControls.volume.value;
         } else if (e.code === 'ArrowDown') {
             videoControls.volume.value -= .1;
+            volume.value = videoControls.volume.value;
         }
     });
     window.addEventListener('mousemove', () => {
@@ -104,12 +108,15 @@ const { data: streams } = useQuery({
                 <div
                     class="absolute top-0 bottom-[calc(100%-100px)] left-0 right-0 pt-3 pb-2 flex-center cursor-pointer group"
                     @mousedown="volumeMouseDown"
-                    ref="volumeSlider"
                 >
-                    <div class="w-1 h-full bg-gray-600 relative">
+                    <div
+                        class="w-1 h-full bg-gray-600 relative"
+                        ref="volumeSlider"
+                    >
                         <div
                             class="absolute left-0 bottom-0 right-0 bg-gray-300 group-hover:bg-gray-100 transition-colors"
-                            :style="{ height: `${volume * 100}%` }" />
+                            :style="{ height: `${volume * 100}%` }"
+                        />
                     </div>
                 </div>
             </div>
