@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
 import {
-    useElementBounding,
     type UseFullscreenReturn,
     useLocalStorage,
     type UseMediaControlsReturn, useTimeout
