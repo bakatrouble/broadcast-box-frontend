@@ -87,7 +87,7 @@ const onLoadedMetadata = () => {
 <template>
     <div id="app" class="flex-center w-screen h-screen" ref="app">
         <div class="w-full h-full flex-center relative">
-            <div class="flex-center w-full h-full" @mousedown="videoControls.playing.value = !videoControls.playing.value">
+            <div class="flex-center w-full h-full">
                 <video
                     ref="video"
                     :width="videoWidth"
