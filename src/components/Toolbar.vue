@@ -17,7 +17,6 @@ const { videoControls, videoFullscreen, channel } = defineProps<{
 const volumeOut = ref(false);
 const volume = useLocalStorage('volume', 1, { mergeDefaults: true });
 const volumeSlider = ref<HTMLVideoElement>();
-const volumeSliderRect = useElementBounding(volumeSlider);
 const muted = useLocalStorage('muted', false, { mergeDefaults: true });
 
 const show = ref(false);
@@ -35,6 +34,7 @@ watch(videoControls.playing, playing => {
     }
 })
 
+const volumeAdjusting = ref(false);
 const volumeMouseDown = (e: MouseEvent) => {
     window.addEventListener('mousemove', volumeMouseMove);
     window.addEventListener('mouseup', volumeMouseUp);
@@ -42,7 +42,9 @@ const volumeMouseDown = (e: MouseEvent) => {
 }
 
 const volumeMouseMove = (e: MouseEvent) => {
-    const rawValue = Math.abs((e.clientY - volumeSliderRect.top.value) / volumeSliderRect.height.value);
+    volumeAdjusting.value = true;
+    const rect = volumeSlider.value!.getBoundingClientRect();
+    const rawValue = (e.clientY - rect.top) / rect.height;
     let value = 1 - Math.max(0, Math.min(1, rawValue));
 
     videoControls.volume.value = volume.value = value;
@@ -51,6 +53,7 @@ const volumeMouseMove = (e: MouseEvent) => {
 const volumeMouseUp = () => {
     window.removeEventListener('mousemove', volumeMouseMove);
     window.removeEventListener('mouseup', volumeMouseUp);
+    volumeAdjusting.value = false;
 }
 
 watch(volume, volume => {
@@ -103,7 +106,7 @@ const { data: streams } = useQuery({
         >
             <div
                 class="absolute z-0 bg-gray-800 rounded-sm bottom-0 left-0 right-0 h-full data-[out=true]:h-[calc(100%+100px)] transition-all overflow-hidden"
-                :data-out="volumeOut"
+                :data-out="volumeOut || volumeAdjusting"
             >
                 <div
                     class="absolute top-0 bottom-[calc(100%-100px)] left-0 right-0 pt-3 pb-2 flex-center cursor-pointer group"
