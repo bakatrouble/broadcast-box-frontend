@@ -66,14 +66,21 @@ watch(muted, muted => {
 onMounted(() => {
     window.addEventListener('keydown', (e: KeyboardEvent) => {
         console.log('keydown', e);
-        if (e.code === 'Space') {
-            videoControls.playing.value = !videoControls.playing.value;
-        } else if (e.code === 'ArrowUp') {
-            videoControls.volume.value += .1;
-            volume.value = videoControls.volume.value;
-        } else if (e.code === 'ArrowDown') {
-            videoControls.volume.value -= .1;
-            volume.value = videoControls.volume.value;
+        switch (e.code) {
+            case 'Space':
+                videoControls.playing.value = !videoControls.playing.value;
+                break;
+            case 'ArrowUp':
+                videoControls.volume.value += .1;
+                volume.value = videoControls.volume.value;
+                break;
+            case 'ArrowDown':
+                videoControls.volume.value -= .1;
+                volume.value = videoControls.volume.value;
+                break;
+            case 'KeyF':
+                videoFullscreen.toggle();
+                break;
         }
     });
     window.addEventListener('mousemove', () => {
@@ -135,7 +142,7 @@ const { data: streams } = useQuery({
         <button v-if="videoControls.supportsPictureInPicture" class="btn mr-2" @click="videoControls.togglePictureInPicture()">
             <mdicon name="picture-in-picture-bottom-right" />
         </button>
-        <button class="btn" @click="videoFullscreen.isFullscreen.value ? videoFullscreen.exit() : videoFullscreen.enter()">
+        <button class="btn" @click="videoFullscreen.toggle()">
             <mdicon :name="videoFullscreen.isFullscreen.value ? 'fullscreen-exit' : 'fullscreen'" />
         </button>
     </div>
