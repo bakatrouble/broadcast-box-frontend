@@ -14,9 +14,9 @@ const { videoControls, videoFullscreen, channel } = defineProps<{
 }>();
 
 const volumeOut = ref(false);
-const volume = useLocalStorage('volume', 1, { mergeDefaults: true });
+const volume = useLocalStorage(`${channel}:volume`, 1, { mergeDefaults: true });
 const volumeSlider = ref<HTMLVideoElement>();
-const muted = useLocalStorage('muted', false, { mergeDefaults: true });
+const muted = useLocalStorage(`${channel}:muted`, false, { mergeDefaults: true });
 
 const show = ref(false);
 const showTimeout = useTimeout(3000, {
