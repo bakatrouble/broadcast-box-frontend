@@ -5,6 +5,9 @@ export const DEFAULT_CHANNEL = "bakatrouble";
 
 export interface StreamStatus {
     streamKey: string;
+    videoTracks?: { rid: string }[];
+    audioTracks?: { rid: string }[];
+    sessions?: unknown[];
 }
 
 export function useStreams() {

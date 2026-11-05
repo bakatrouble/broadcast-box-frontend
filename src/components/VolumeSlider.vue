@@ -39,7 +39,12 @@ onUnmounted(stopAdjusting);
 </script>
 
 <template>
-    <div class="relative flex items-center justify-center" @mouseover="expanded = true" @mouseout="expanded = false">
+    <div
+        class="relative flex items-center justify-center"
+        @mouseover="expanded = true"
+        @mouseout="expanded = false"
+        @mousedown.stop
+    >
         <div
             class="absolute z-0 bg-gray-800 rounded-sm bottom-0 left-0 right-0 h-full data-[out=true]:h-[calc(100%+100px)] transition-all overflow-hidden"
             :data-out="expanded || adjusting"

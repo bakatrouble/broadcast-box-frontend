@@ -4,7 +4,18 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
-    plugins: [vue(), tailwindcss()],
+    plugins: [
+        vue({
+            template: {
+                compilerOptions: {
+                    // admin-panel is a native custom element (see main.ts),
+                    // not a Vue component.
+                    isCustomElement: (tag) => tag === "admin-panel",
+                },
+            },
+        }),
+        tailwindcss(),
+    ],
     resolve: {
         alias: {
             '@': new URL('./src', import.meta.url).pathname,
