@@ -3,177 +3,145 @@ import { onMounted, ref, watch } from "vue";
 import {
     type UseFullscreenReturn,
     useLocalStorage,
-    type UseMediaControlsReturn, useTimeout
+    type UseMediaControlsReturn,
+    useTimeout,
 } from "@vueuse/core";
-import { useQuery } from "@tanstack/vue-query";
+import MdiIcon from "@/components/MdiIcon.vue";
+import ToolbarButton from "@/components/ToolbarButton.vue";
+import VolumeSlider from "@/components/VolumeSlider.vue";
 
-const { videoControls, videoFullscreen, channel } = defineProps<{
-    videoControls: UseMediaControlsReturn,
-    videoFullscreen: UseFullscreenReturn,
-    channel: string,
+const { videoControls, videoFullscreen, channel, uiHidden } = defineProps<{
+    videoControls: UseMediaControlsReturn;
+    videoFullscreen: UseFullscreenReturn;
+    channel: string;
+    uiHidden?: boolean;
 }>();
 
-const volumeOut = ref(false);
+const emit = defineEmits<{
+    openStreams: [];
+}>();
+
 const volume = useLocalStorage(`${channel}:volume`, 1, { mergeDefaults: true });
-const volumeSlider = ref<HTMLVideoElement>();
-const muted = useLocalStorage(`${channel}:muted`, false, { mergeDefaults: true });
+const muted = useLocalStorage(`${channel}:muted`, false, {
+    mergeDefaults: true,
+});
 
 const show = ref(false);
 const showTimeout = useTimeout(3000, {
     controls: true,
     callback: () => {
         if (videoControls.playing.value) {
-            show.value = !show.value;
+            show.value = false;
         }
-    }
+    },
 });
-watch(videoControls.playing, playing => {
+watch(videoControls.playing, (playing) => {
     if (playing) {
         showTimeout.start();
     }
-})
+});
 
-const volumeAdjusting = ref(false);
-const volumeMouseDown = (e: MouseEvent) => {
-    window.addEventListener('mousemove', volumeMouseMove);
-    window.addEventListener('mouseup', volumeMouseUp);
-    volumeMouseMove(e);
-}
+const clampVolume = (value: number) => Math.min(1, Math.max(0, value));
 
-const volumeMouseMove = (e: MouseEvent) => {
-    volumeAdjusting.value = true;
-    const rect = volumeSlider.value!.getBoundingClientRect();
-    const rawValue = (e.clientY - rect.top) / rect.height;
-    let value = 1 - Math.max(0, Math.min(1, rawValue));
+watch(
+    volume,
+    (volume) => {
+        videoControls.volume.value = volume;
+    },
+    { immediate: true },
+);
 
-    videoControls.volume.value = volume.value = value;
-}
-
-const volumeMouseUp = () => {
-    window.removeEventListener('mousemove', volumeMouseMove);
-    window.removeEventListener('mouseup', volumeMouseUp);
-    volumeAdjusting.value = false;
-}
-
-watch(volume, volume => {
-    videoControls.volume.value = volume;
-}, { immediate: true });
-
-watch(muted, muted => {
-    videoControls.muted.value = muted;
-}, { immediate: true });
+watch(
+    muted,
+    (muted) => {
+        videoControls.muted.value = muted;
+    },
+    { immediate: true },
+);
 
 onMounted(() => {
-    window.addEventListener('keydown', (e: KeyboardEvent) => {
-        console.log('keydown', e);
+    window.addEventListener("keydown", (e: KeyboardEvent) => {
+        // Let focused controls handle their own keys (avoids double-toggle).
+        if ((e.target as HTMLElement | null)?.closest("button, input, a")) {
+            return;
+        }
         switch (e.code) {
-            case 'Space':
+            case "Space":
+                e.preventDefault();
                 videoControls.playing.value = !videoControls.playing.value;
                 break;
-            case 'ArrowUp':
-                videoControls.volume.value += .1;
-                volume.value = videoControls.volume.value;
+            case "ArrowUp":
+                e.preventDefault();
+                videoControls.volume.value = volume.value = clampVolume(
+                    videoControls.volume.value + 0.1,
+                );
                 break;
-            case 'ArrowDown':
-                videoControls.volume.value -= .1;
-                volume.value = videoControls.volume.value;
+            case "ArrowDown":
+                e.preventDefault();
+                videoControls.volume.value = volume.value = clampVolume(
+                    videoControls.volume.value - 0.1,
+                );
                 break;
-            case 'KeyF':
+            case "KeyF":
                 videoFullscreen.toggle();
                 break;
         }
     });
-    window.addEventListener('mousemove', () => {
+    window.addEventListener("mousemove", () => {
         show.value = true;
         showTimeout.start();
     });
 });
-
-const streamsModal = ref(false);
-const { data: streams } = useQuery({
-    queryKey: ['streams'],
-    queryFn: async () => {
-        const r = await fetch('https://broadcast.bakatrouble.me/api/status').then(res => res.json());
-        return r as { streamKey: string }[];
-    },
-    refetchInterval: 5000,
-});
 </script>
 
 <template>
-    <div class="absolute flex flex-row items-center bottom-0 left-0 right-0 p-4 opacity-0 data-[show=true]:opacity-100 transition-opacity" :data-show="show">
-        <button class="btn" @click="videoControls.playing.value = !videoControls.playing.value">
-            <mdicon :name="videoControls.playing.value ? 'pause' : 'play'" />
-        </button>
-        <div
-            class="ml-2 flex-center relative"
-            @mouseover="volumeOut = true"
-            @mouseout="volumeOut = false"
-        >
-            <div
-                class="absolute z-0 bg-gray-800 rounded-sm bottom-0 left-0 right-0 h-full data-[out=true]:h-[calc(100%+100px)] transition-all overflow-hidden"
-                :data-out="volumeOut || volumeAdjusting"
+        <div class="absolute flex flex-row items-center bottom-0 left-0 right-0 p-4 opacity-0 data-[show=true]:opacity-100 transition-opacity" :data-show="show && !uiHidden">
+            <toolbar-button
+                :aria-label="videoControls.playing.value ? 'Pause' : 'Play'"
+                :tooltip="videoControls.playing.value ? 'Pause (Space)' : 'Play (Space)'"
+                @click="videoControls.playing.value = !videoControls.playing.value"
             >
-                <div
-                    class="absolute top-0 bottom-[calc(100%-100px)] left-0 right-0 pt-3 pb-2 flex-center cursor-pointer group"
-                    @mousedown="volumeMouseDown"
-                >
-                    <div
-                        class="w-1 h-full bg-gray-600 relative"
-                        ref="volumeSlider"
+                <mdi-icon :name="videoControls.playing.value ? 'pause' : 'play'" />
+            </toolbar-button>
+            <div class="ml-2 flex items-center justify-center">
+                <volume-slider v-model="volume">
+                    <toolbar-button
+                        size="icon-sm"
+                        class="relative z-10"
+                        :aria-label="muted ? 'Unmute' : 'Mute'"
+                        @click="muted = !muted"
                     >
-                        <div
-                            class="absolute left-0 bottom-0 right-0 bg-gray-300 group-hover:bg-gray-100 transition-colors"
-                            :style="{ height: `${volume * 100}%` }"
-                        />
-                    </div>
-                </div>
+                        <mdi-icon size="20" :name="muted ? 'volume-off' : 'volume-high'" />
+                    </toolbar-button>
+                </volume-slider>
             </div>
-            <button class="btn relative z-10" @click="muted = !muted">
-                <mdicon size="20" :name="muted ? 'volume-off' : 'volume-high'" />
-            </button>
-        </div>
-        <div class="ml-2 flex-center">
-            <button class="btn relative z-10" title="Active streams" @click="streamsModal = true">
-                <mdicon size="20" name="view-stream" />
-            </button>
-        </div>
-        <div class="grow"></div>
-        <button v-if="videoControls.supportsPictureInPicture" class="btn mr-2" @click="videoControls.togglePictureInPicture()">
-            <mdicon name="picture-in-picture-bottom-right" />
-        </button>
-        <button class="btn" @click="videoFullscreen.toggle()">
-            <mdicon :name="videoFullscreen.isFullscreen.value ? 'fullscreen-exit' : 'fullscreen'" />
-        </button>
-    </div>
-
-    <div
-        class="fixed w-screen h-screen top-0 left-0 z-100 bg-[#00000060] flex-center opacity-0 pointer-events-none data-[show=true]:pointer-events-auto data-[show=true]:opacity-100 transition-opacity"
-        :data-show="streamsModal"
-        @click.self="streamsModal = false"
-    >
-        <div class="w-100 bg-gray-800 rounded-md text-gray-200 relative">
-            <div class="flex flex-row items-center border-b border-b-gray-600 px-4 py-2">
-                <h3 class="text-xl">Active streams</h3>
-                <div class="grow" />
-                <button class="cursor-pointer" @click="streamsModal = false">
-                    <mdicon name="close" />
-                </button>
-            </div>
-            <div class="px-4 py-2">
-                <a
-                    v-for="stream in streams"
-                    :class="['px-2 py-1 flex mb-1 rounded-sm w-full', stream.streamKey === channel ? 'bg-gray-600' : 'bg-gray-700']"
-                    :href="`/?channel=${stream.streamKey}`"
+            <div class="ml-2 flex items-center justify-center">
+                <toolbar-button
+                    size="icon-sm"
+                    class="relative z-10"
+                    aria-label="Active streams"
+                    tooltip="Active streams"
+                    @click="emit('openStreams')"
                 >
-                    <mdicon name="play" class="mr-2" />
-                    {{' '}}{{ stream.streamKey }}
-                </a>
+                    <mdi-icon size="20" name="view-stream" />
+                </toolbar-button>
             </div>
+            <div class="grow"></div>
+            <toolbar-button
+                v-if="videoControls.supportsPictureInPicture"
+                class="mr-2"
+                aria-label="Picture in picture"
+                tooltip="Picture in picture"
+                @click="videoControls.togglePictureInPicture()"
+            >
+                <mdi-icon name="picture-in-picture-bottom-right" />
+            </toolbar-button>
+            <toolbar-button
+                :aria-label="videoFullscreen.isFullscreen.value ? 'Exit fullscreen' : 'Fullscreen'"
+                :tooltip="videoFullscreen.isFullscreen.value ? 'Exit fullscreen (F)' : 'Fullscreen (F)'"
+                @click="videoFullscreen.toggle()"
+            >
+                <mdi-icon :name="videoFullscreen.isFullscreen.value ? 'fullscreen-exit' : 'fullscreen'" />
+            </toolbar-button>
         </div>
-    </div>
 </template>
-
-<style scoped>
-
-</style>

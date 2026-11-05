@@ -1,0 +1,33 @@
+import {
+    mdiClose,
+    mdiContentCopy,
+    mdiDelete,
+    mdiFullscreen,
+    mdiFullscreenExit,
+    mdiLogout,
+    mdiPause,
+    mdiPictureInPictureBottomRight,
+    mdiPlay,
+    mdiRefresh,
+    mdiTelevisionOff,
+    mdiViewStream,
+    mdiVolumeHigh,
+    mdiVolumeOff,
+} from "@mdi/js";
+
+export const mdiIcons = {
+    mdiClose,
+    mdiContentCopy,
+    mdiDelete,
+    mdiFullscreen,
+    mdiFullscreenExit,
+    mdiLogout,
+    mdiPause,
+    mdiPictureInPictureBottomRight,
+    mdiPlay,
+    mdiRefresh,
+    mdiTelevisionOff,
+    mdiViewStream,
+    mdiVolumeHigh,
+    mdiVolumeOff,
+};

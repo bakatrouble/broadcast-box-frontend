@@ -1,46 +1,31 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-import mdiVue from 'mdi-vue/v3';
-import {
-    mdiContentCopy,
-    mdiCheck,
-    mdiOpenInNew,
-    mdiUpload,
-    mdiMagnify,
-    mdiClose,
-    mdiChevronLeft,
-    mdiChevronRight,
-    mdiFullscreen,
-    mdiPause,
-    mdiPlay,
-    mdiVolumeOff,
-    mdiVolumeHigh,
-    mdiFullscreenExit,
-    mdiPictureInPictureBottomRight,
-    mdiViewStream,
-} from '@mdi/js';
-import { VueQueryPlugin } from "@tanstack/vue-query";
+import { createApp, defineCustomElement } from "vue";
+import App from "./App.vue";
+import { router } from "./router";
+import mdiVue from "mdi-vue/v3";
+import { mdiIcons } from "./lib/icons";
+import { QueryClient, VueQueryPlugin } from "@tanstack/vue-query";
+import AdminPanel from "./components/AdminPanel.vue";
+import adminCss from "./admin.css?inline";
 
 createApp(App)
     .use(mdiVue, {
-        icons: {
-            mdiContentCopy,
-            mdiCheck,
-            mdiOpenInNew,
-            mdiUpload,
-            mdiMagnify,
-            mdiClose,
-            mdiChevronLeft,
-            mdiChevronRight,
-            mdiFullscreen,
-            mdiPause,
-            mdiPlay,
-            mdiVolumeOff,
-            mdiVolumeHigh,
-            mdiFullscreenExit,
-            mdiPictureInPictureBottomRight,
-            mdiViewStream,
-        }
+        icons: mdiIcons,
     })
     .use(VueQueryPlugin)
-    .mount('#app')
+    .use(router)
+    .mount("#app");
+
+if (!customElements.get("admin-panel")) {
+    const AdminPanelElement = defineCustomElement(AdminPanel, {
+        styles: [adminCss],
+        configureApp: (app) => {
+            app.use(mdiVue, {
+                icons: mdiIcons,
+            });
+            app.use(VueQueryPlugin, {
+                queryClient: new QueryClient(),
+            });
+        },
+    });
+    customElements.define("admin-panel", AdminPanelElement);
+}

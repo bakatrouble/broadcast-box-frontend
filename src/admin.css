@@ -1,0 +1,50 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn-vue/tailwind.css";
+
+/* Theme + base for the admin shadow tree. This file is imported with
+   ?inline and injected into the custom element's shadow root, so none
+   of it touches the document (and document styles don't cross in). */
+
+@theme inline {
+    --color-background: oklch(0.145 0 0);
+    --color-foreground: oklch(0.985 0 0);
+    --color-card: oklch(0.205 0 0);
+    --color-card-foreground: oklch(0.985 0 0);
+    --color-popover: oklch(0.205 0 0);
+    --color-popover-foreground: oklch(0.985 0 0);
+    --color-primary: oklch(0.922 0 0);
+    --color-primary-foreground: oklch(0.205 0 0);
+    --color-secondary: oklch(0.269 0 0);
+    --color-secondary-foreground: oklch(0.985 0 0);
+    --color-muted: oklch(0.269 0 0);
+    --color-muted-foreground: oklch(0.708 0 0);
+    --color-accent: oklch(0.269 0 0);
+    --color-accent-foreground: oklch(0.985 0 0);
+    --color-destructive: oklch(0.704 0.191 22.216);
+    --color-border: oklch(1 0 0 / 10%);
+    --color-input: oklch(1 0 0 / 15%);
+    --color-ring: oklch(0.556 0 0);
+    --radius: 0.625rem;
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+:host {
+    display: contents;
+    color-scheme: dark;
+    /* Shadow trees don't inherit document body text color, so anything
+       without an explicit color would fall back to black. */
+    color: oklch(0.985 0 0);
+}
+
+/* MdiIcon sizes its wrapper span explicitly; let the svg fill it so
+   Button's svg sizing can't shrink icons. */
+span.mdi > svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
