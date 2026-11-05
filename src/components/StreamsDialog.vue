@@ -57,10 +57,13 @@ const { data: streams } = useStreams();
                             : 'bg-gray-700 hover:bg-gray-600',
                     ]"
                 >
-                    <a :href="`/${stream.streamKey}`">
+                    <router-link
+                        :to="`/${stream.streamKey}`"
+                        @click="open = false"
+                    >
                         <mdi-icon name="play" class="mr-2" />
                         {{ " " }}{{ stream.streamKey }}
-                    </a>
+                        </router-link>
                 </ui-button>
                 <p
                     v-if="!streams?.length"
